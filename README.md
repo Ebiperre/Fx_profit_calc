@@ -1,5 +1,3 @@
-Here’s a clean README you can drop into the repo.
-
 # FX Profit Calculator
 
 A tiny, elegant single-page web app for calculating FX profits on NGN⇄USD transfers. Enter the client’s naira amount, your provider’s NGN/USD rate, and your per-dollar margin. The app shows the USD delivered, effective rate, provider cost, your profit (₦), and profit % — with slick UI and instant updates.
