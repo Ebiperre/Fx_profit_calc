@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FX Profit Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: #fafbfc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .currency-label {
+            display: inline-block;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .results {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .profit-highlight {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white !important;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        .quick-margins {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .margin-btn {
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .margin-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .quick-margins {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>💰 FX Profit Calculator</h1>
+            <p>Calculate your foreign exchange profit margins</p>
+        </div>
+
+        <form id="calculator-form">
+            <div class="form-group">
+                <label for="naira-amount">Client Amount <span class="currency-label">NGN</span></label>
+                <input type="text" id="naira-amount" placeholder="e.g. 20,000,000" required>
+                <div id="amount-in-words" style="margin-top: 8px; font-size: 14px; color: #666; font-style: italic; min-height: 20px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="provider-rate">Provider Rate <span class="currency-label">NGN per USD</span></label>
+                <input type="number" id="provider-rate" placeholder="e.g. 1540" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="profit-margin">Your Profit Margin <span class="currency-label">NGN per USD</span></label>
+                <input type="number" id="profit-margin" placeholder="e.g. 10" step="0.01" required>
+                
+                <div class="quick-margins">
+                    <button type="button" class="margin-btn" onclick="setMargin(3)">₦3</button>
+                    <button type="button" class="margin-btn" onclick="setMargin(5)">₦5</button>
+                    <button type="button" class="margin-btn" onclick="setMargin(10)">₦10</button>
+                    <button type="button" class="margin-btn" onclick="setMargin(15)">₦15</button>
+                    <button type="button" class="margin-btn" onclick="setMargin(20)">₦20</button>
+                </div>
+            </div>
+
+            <button type="submit" class="calculate-btn">Calculate Profit</button>
+        </form>
+
+        <div id="results" class="results">
+            <div class="result-item">
+                <span class="result-label">Client Pays:</span>
+                <span class="result-value" id="client-pays">₦0.00</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">USD Amount (after your rate):</span>
+                <span class="result-value" id="usd-amount">$0.00</span>
+            </div>
+            <div id="fee-notice" class="result-item" style="display: none; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 12px; margin: 10px 0;">
+                <span class="result-label" style="color: #856404;">Additional Fee Required:</span>
+                <span class="result-value" style="color: #856404;">$25.00 (transfers under $10,000)</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Provider Cost:</span>
+                <span class="result-value" id="provider-cost">₦0.00</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Your Effective Rate:</span>
+                <span class="result-value" id="effective-rate">₦0.00 per USD</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Your Profit:</span>
+                <span class="result-value profit-highlight" id="total-profit">₦0.00</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Profit Percentage:</span>
+                <span class="result-value" id="profit-percentage">0.00%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-NG').format(num);
+        }
+
+        function formatCurrency(value) {
+            // Remove all non-digit characters except decimal point
+            let numStr = value.toString().replace(/[^\d.]/g, '');
+            
+            // Handle decimal places
+            let parts = numStr.split('.');
+            if (parts.length > 2) {
+                numStr = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            let num = parseFloat(numStr);
+            if (isNaN(num)) return '';
+            
+            // Format with commas
+            return new Intl.NumberFormat('en-NG', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        function numberToWords(num) {
+            if (num === 0) return 'Zero';
+            
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+
+            function convertThreeDigits(n) {
+                let result = '';
+                
+                if (n >= 100) {
+                    result += ones[Math.floor(n / 100)] + ' Hundred ';
+                    n %= 100;
+                }
+                
+                if (n >= 20) {
+                    result += tens[Math.floor(n / 10)] + ' ';
+                    n %= 10;
+                } else if (n >= 10) {
+                    result += teens[n - 10] + ' ';
+                    n = 0;
+                }
+                
+                if (n > 0) {
+                    result += ones[n] + ' ';
+                }
+                
+                return result.trim();
+            }
+
+            let result = '';
+            let scaleIndex = 0;
+            
+            while (num > 0) {
+                let chunk = num % 1000;
+                if (chunk !== 0) {
+                    let chunkWords = convertThreeDigits(chunk);
+                    if (scaleIndex > 0) {
+                        chunkWords += ' ' + scales[scaleIndex];
+                    }
+                    result = chunkWords + (result ? ' ' + result : '');
+                }
+                num = Math.floor(num / 1000);
+                scaleIndex++;
+            }
+            
+            return result || 'Zero';
+        }
+
+        function updateAmountInWords() {
+            const input = document.getElementById('naira-amount');
+            const wordsDiv = document.getElementById('amount-in-words');
+            
+            if (!input || !wordsDiv) {
+                console.error('Required elements not found for amount in words');
+                return;
+            }
+            
+            let value = input.value.replace(/[^\d.]/g, '');
+            if (value && !isNaN(parseFloat(value))) {
+                let num = Math.floor(parseFloat(value));
+                if (num > 0) {
+                    wordsDiv.textContent = numberToWords(num) + ' Naira';
+                } else {
+                    wordsDiv.textContent = '';
+                }
+            } else {
+                wordsDiv.textContent = '';
+            }
+        }
+
+        function setMargin(value) {
+            const profitMarginInput = document.getElementById('profit-margin');
+            if (profitMarginInput) {
+                profitMarginInput.value = value;
+                
+                // Only calculate if all required fields have values
+                const nairaAmount = document.getElementById('naira-amount').value;
+                const providerRate = document.getElementById('provider-rate').value;
+                if (nairaAmount && providerRate) {
+                    calculateProfit();
+                }
+            }
+        }
+
+        function calculateProfit() {
+    const nairaInput = document.getElementById('naira-amount').value;
+    const nairaAmount = parseFloat(nairaInput.replace(/[^\d.]/g, ''));
+    const providerRate = parseFloat(document.getElementById('provider-rate').value);
+    const profitMargin = parseFloat(document.getElementById('profit-margin').value);
+
+    if (isNaN(nairaAmount) || isNaN(providerRate) || isNaN(profitMargin)) {
+        return;
+    }
+
+    // Calculate transfer fee in NGN (using provider rate)
+    const transferFeeUSD = 25;
+    const transferFeeNGN = transferFeeUSD * providerRate;
+
+    // Calculate NGN available after fee
+    const ngnAfterFee = nairaAmount - transferFeeNGN;
+
+    // Calculate effective rate
+    const effectiveRate = providerRate + profitMargin;
+
+    // Calculate USD amount the client receives
+    const usdAmount = ngnAfterFee / effectiveRate;
+
+    // Calculate provider cost
+    const providerCost = usdAmount * providerRate;
+
+    // Calculate total profit
+    const totalProfit = usdAmount * profitMargin;
+
+    // Calculate profit percentage
+    const profitPercentage = (totalProfit / providerCost) * 100;
+
+    // Update results
+    document.getElementById('client-pays').textContent = `₦${formatNumber(nairaAmount.toFixed(2))}`;
+    document.getElementById('usd-amount').textContent = `$${formatNumber(usdAmount.toFixed(2))}`;
+    document.getElementById('provider-cost').textContent = `₦${formatNumber(providerCost.toFixed(2))}`;
+    document.getElementById('effective-rate').textContent = `₦${formatNumber(effectiveRate.toFixed(2))} per USD`;
+    document.getElementById('total-profit').textContent = `₦${formatNumber(totalProfit.toFixed(2))}`;
+    document.getElementById('profit-percentage').textContent = `${profitPercentage.toFixed(2)}%`;
+
+    // Handle fee notice
+    const feeNotice = document.getElementById('fee-notice');
+    if (usdAmount < 10000) {
+        feeNotice.style.display = 'block';
+        feeNotice.querySelector('.result-value').textContent = `$${transferFeeUSD.toFixed(2)} (₦${formatNumber(transferFeeNGN.toFixed(2))})`;
+    } else {
+        feeNotice.style.display = 'none';
+    }
+
+    // Show results
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.classList.add('show');
+}
+
+        document.getElementById('calculator-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateProfit();
+        });
+
+        // Handle naira amount input formatting
+        document.getElementById('naira-amount').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d.]/g, '');
+            
+            if (value) {
+                e.target.value = formatCurrency(value);
+                updateAmountInWords();
+                
+                // Auto-calculate if all fields are filled
+                const providerRate = document.getElementById('provider-rate').value;
+                const profitMargin = document.getElementById('profit-margin').value;
+                if (providerRate && profitMargin) {
+                    calculateProfit();
+                }
+            } else {
+                const wordsDiv = document.getElementById('amount-in-words');
+                if (wordsDiv) {
+                    wordsDiv.textContent = '';
+                }
+            }
+        });
+
+        // Auto-calculate when other inputs change
+        document.querySelectorAll('#provider-rate, #profit-margin').forEach(input => {
+            input.addEventListener('input', function() {
+                const nairaAmount = document.getElementById('naira-amount').value;
+                if (nairaAmount && this.value) {
+                    calculateProfit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+</body>
+</html>
